@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"time"
 
@@ -128,6 +129,39 @@ func UpdateBook() gin.HandlerFunc {
 
 func DeleteBook() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
 
+		bookId := c.Param("book_id")
+
+		objectId, _ := primitive.ObjectIDFromHex(bookId)
+
+		_, err := bookCollection.DeleteOne(ctx, bson.M{"_id": objectId})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error occured while deleting book item."})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Book item deleted successfully."})
+	}
+}
+
+func GetAllBooks() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		result, err := bookCollection.Find(context.TODO(), bson.M{})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error occured while fetching book list"})
+			return
+		}
+
+		var allBooks []bson.M
+		if err := result.All(ctx, &allBooks); err != nil {
+			log.Fatal(err)
+		}
+
+		c.JSON(http.StatusOK, allBooks)
 	}
 }
