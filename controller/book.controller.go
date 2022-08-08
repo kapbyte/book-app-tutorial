@@ -153,7 +153,7 @@ func GetAllBooks() gin.HandlerFunc {
 
 		result, err := bookCollection.Find(context.TODO(), bson.M{})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error occured while fetching book list."})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error occured while fetching book list"})
 			return
 		}
 
